@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-src 'none'" />
+    <title>HomeHub Desktop</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --panel: #111827;
+        --panel-alt: #1e293b;
+        --surface: #0b1220;
+        --text: #f8fafc;
+        --muted: #94a3b8;
+        --accent: #60a5fa;
+        --accent-strong: #2563eb;
+        --success: #34d399;
+        --warning: #fbbf24;
+        --danger: #fca5a5;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: linear-gradient(180deg, #020817 0%, var(--bg) 100%);
+        color: var(--text);
+      }
+
+      .app {
+        min-height: 100vh;
+        padding: 24px;
+      }
+
+      .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+
+      .brand {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 30px;
+      }
+
+      .subtext {
+        color: var(--muted);
+      }
+
+      .toolbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .toolbar-actions button,
+      .small-btn,
+      .primary-btn,
+      .secondary-btn {
+        border-radius: 10px;
+        border: 1px solid #334155;
+        font: inherit;
+        cursor: pointer;
+        transition: transform 100ms ease, filter 100ms ease, opacity 100ms ease;
+      }
+
+      button:active:not(:disabled) {
+        transform: scale(0.95);
+        filter: brightness(1.22);
+      }
+
+      button:disabled {
+        cursor: wait;
+        opacity: 0.58;
+      }
+
+      .primary-btn {
+        background: var(--accent-strong);
+        color: white;
+        padding: 10px 16px;
+      }
+
+      .secondary-btn {
+        background: var(--panel-alt);
+        color: var(--text);
+        padding: 10px 12px;
+      }
+
+      .status {
+        background: rgba(17, 24, 39, 0.9);
+        border: 1px solid #1f2937;
+        border-radius: 18px;
+        padding: 16px 18px;
+        margin-bottom: 22px;
+      }
+
+      .status-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .status-pill {
+        display: inline-block;
+        padding: 6px 10px;
+        font-size: 12px;
+        font-weight: 700;
+        border-radius: 999px;
+        background: rgba(52, 211, 153, 0.12);
+        color: var(--success);
+      }
+
+      .status-pill.warning {
+        background: rgba(251, 191, 36, 0.12);
+        color: var(--warning);
+      }
+
+      .status-pill.offline {
+        background: rgba(248, 113, 113, 0.12);
+        color: var(--danger);
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 14px;
+        margin-bottom: 22px;
+      }
+
+      .stat {
+        background: rgba(17, 24, 39, 0.9);
+        border: 1px solid #1f2937;
+        border-radius: 16px;
+        padding: 16px;
+      }
+
+      .stat-label {
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      .stat-value {
+        font-size: 27px;
+        font-weight: 800;
+        margin-top: 8px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 18px;
+      }
+
+      .device {
+        background: rgba(17, 24, 39, 0.9);
+        border: 1px solid #1f2937;
+        border-radius: 18px;
+        padding: 18px;
+        min-height: 170px;
+      }
+
+      .device[aria-expanded="true"] {
+        border-color: #3b82f6;
+      }
+
+      .device-toggle {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .device-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .device-name {
+        font-size: 20px;
+        font-weight: 700;
+      }
+
+      h2.device-name {
+        margin: 0;
+      }
+
+      .device-room {
+        color: var(--muted);
+        margin-top: 4px;
+      }
+
+      .device-badge {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        background: rgba(52, 211, 153, 0.15);
+        color: var(--success);
+      }
+
+      .device-offline {
+        background: rgba(248, 113, 113, 0.12);
+        color: var(--danger);
+      }
+
+      .meta {
+        color: var(--muted);
+        margin-top: 12px;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      .actions[hidden] { display: none; }
+
+      .remote-pad {
+        display: grid;
+        gap: 8px;
+        justify-items: center;
+        margin-top: 16px;
+      }
+
+      .remote-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .remote-row[hidden] { display: none; }
+
+      .small-btn {
+        background: var(--panel-alt);
+        color: var(--text);
+        padding: 8px 12px;
+      }
+
+      .icon-btn {
+        min-width: 42px;
+        min-height: 40px;
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .app-launcher {
+        display: grid;
+        gap: 8px;
+        margin-top: 12px;
+        width: 100%;
+      }
+
+      .app-launcher-title {
+        color: var(--muted);
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .app-launch-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .app-launch-btn {
+        display: flex;
+        min-width: 96px;
+        min-height: 42px;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 4px 10px;
+        border: 1px solid #334155;
+        border-radius: 9px;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 700;
+      }
+
+      .app-launch-btn .app-mark {
+        font-size: 18px;
+        line-height: 1;
+      }
+
+      .app-launch-btn .app-name {
+        font-size: 10px;
+      }
+
+      .app-launch-btn[data-app="netflix"] {
+        color: #fff;
+        background: #e50914;
+      }
+
+      .app-launch-btn[data-app="netflix"] .app-mark {
+        font: 900 26px/0.85 Georgia, serif;
+      }
+
+      .app-launch-btn[data-app="prime_video"] {
+        color: #54c8f5;
+        background: #142b43;
+      }
+
+      .app-launch-btn[data-app="hotstar"] {
+        color: #c4b5fd;
+        background: #17133b;
+      }
+
+      .app-launch-btn[data-app="youtube"] {
+        color: #fff;
+        background: #ff0033;
+      }
+
+      .app-launch-btn[data-app="youtube"] .app-mark {
+        display: grid;
+        width: 24px;
+        height: 17px;
+        place-items: center;
+        border-radius: 5px;
+        background: #fff;
+        color: #ff0033;
+        font-size: 12px;
+      }
+
+      .app-launch-btn[data-app="hotstar"] .app-mark {
+        font-size: 23px;
+        line-height: 0.8;
+      }
+
+      .error {
+        color: var(--danger);
+        margin-top: 12px;
+      }
+
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 10;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background: rgba(2, 8, 23, 0.82);
+      }
+
+      .modal-backdrop[hidden] {
+        display: none;
+      }
+
+      .pairing-dialog {
+        width: min(100%, 440px);
+        padding: 24px;
+        border: 1px solid #334155;
+        border-radius: 18px;
+        background: var(--panel);
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+      }
+
+      .pairing-dialog h2 {
+        margin: 0 0 10px;
+      }
+
+      .pairing-dialog p {
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .pairing-code {
+        width: 100%;
+        margin: 12px 0;
+        border: 1px solid #334155;
+        border-radius: 10px;
+        padding: 12px;
+        background: var(--surface);
+        color: var(--text);
+        font: inherit;
+        font-size: 24px;
+        letter-spacing: 0.4em;
+        text-align: center;
+      }
+
+      .pairing-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      .pairing-actions button {
+        border-radius: 10px;
+        border: 1px solid #334155;
+        padding: 10px 14px;
+        font: inherit;
+        cursor: pointer;
+      }
+
+      .pairing-cancel {
+        background: var(--panel-alt);
+        color: var(--text);
+      }
+
+      .pairing-submit {
+        background: var(--accent-strong);
+        color: white;
+      }
+
+      .pairing-actions button:disabled {
+        opacity: 0.6;
+        cursor: wait;
+      }
+
+      @media (max-width: 700px) {
+        .toolbar {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .toolbar-actions {
+          justify-content: space-between;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <div class="toolbar">
+        <div class="brand">
+          <h1>HomeHub Desktop</h1>
+          <div class="subtext">Local LAN smart home</div>
+        </div>
+
+        <div class="toolbar-actions">
+          <button class="secondary-btn" id="settingsBtn" type="button">Settings</button>
+          <button class="secondary-btn" id="discoverBtn" type="button">Discover devices</button>
+          <button class="primary-btn" id="refreshBtn" type="button">Refresh</button>
+        </div>
+      </div>
+
+      <div class="status" role="status" aria-live="polite">
+        <div class="status-row">
+          <strong>Connection</strong>
+          <span class="status-pill" id="statusPill">Live</span>
+        </div>
+        <div class="meta" id="statusText">Loading devices…</div>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Devices</div>
+          <div class="stat-value" id="deviceCount">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Rooms</div>
+          <div class="stat-value" id="roomCount">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Online</div>
+          <div class="stat-value" id="onlineCount">0</div>
+        </div>
+      </div>
+
+      <section class="status" id="discoveryResults" aria-live="polite" hidden></section>
+      <div class="grid" id="deviceGrid" role="list" aria-label="Devices"></div>
+    </main>
+
+    <div class="modal-backdrop" id="pairingModal" hidden>
+      <section class="pairing-dialog" role="dialog" aria-modal="true" aria-labelledby="pairingTitle" aria-describedby="pairingInstructions">
+        <h2 id="pairingTitle">Pair Sony BRAVIA TV</h2>
+        <p id="pairingInstructions">Enter the six-character pairing code shown on your TV. The code may include letters A–F.</p>
+        <form id="pairingForm" novalidate>
+          <label for="pairingCode">Pairing code</label>
+          <input
+            class="pairing-code"
+            id="pairingCode"
+            name="pairingCode"
+            type="text"
+            inputmode="text"
+            autocomplete="one-time-code"
+            maxlength="12"
+            aria-describedby="pairingCodeHint pairingError"
+          />
+          <div class="meta" id="pairingCodeHint">Use characters 0–9 and A–F. Spaces or dashes are okay.</div>
+          <div class="error" id="pairingError" role="alert" hidden></div>
+          <div class="pairing-actions">
+            <button class="pairing-cancel" id="pairingCancel" type="button">Cancel</button>
+            <button class="pairing-submit" id="pairingSubmit" type="submit">Pair TV</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <script src="renderer.js"></script>
+  </body>
+</html>

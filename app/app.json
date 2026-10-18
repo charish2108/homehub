@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "HomeHub",
+    "slug": "homehub-mobile",
+    "version": "0.0.1",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "plugins": ["expo-router", "./plugins/with-local-hub-http"],
+    "scheme": "homehub",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.homehub.mobile",
+      "infoPlist": {
+        "NSLocalNetworkUsageDescription": "HomeHub connects to your local hub to control devices on your home network.",
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoadsLocalNetworking": true
+        }
+      }
+    },
+    "android": {
+      "package": "com.homehub.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

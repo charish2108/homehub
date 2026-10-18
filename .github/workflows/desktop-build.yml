@@ -1,0 +1,44 @@
+name: Desktop build
+
+on:
+  pull_request:
+    paths:
+      - "desktop/**"
+      - ".github/workflows/desktop-build.yml"
+  push:
+    paths:
+      - "desktop/**"
+      - ".github/workflows/desktop-build.yml"
+
+jobs:
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            target: mac
+          - os: windows-latest
+            target: win
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - run: npm ci
+      - run: npm run check
+      - if: matrix.target == 'mac'
+        run: npm run dist:mac
+      - if: matrix.target == 'win'
+        run: npm run dist:win
+      - uses: actions/upload-artifact@v4
+        with:
+          name: homehub-${{ matrix.target }}
+          path: desktop/dist/*
+          if-no-files-found: error
